@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'890dee5a6d3eafe475359916d3c17a43a39e5e3143d124e2c61e5a4bb8f265bd'>;
+  StorageHashBase<'e26fdc7ba0fa5ea196cd8f57404d253ab94e190d68814f1cd09c76c1f7b09f66'>;
 export type ExecutionHash =
   ExecutionHashBase<'909c112433208731a9a45cf71ea34f6338e77fcd7c507f707eddb081d9c45b3e'>;
 export type ProfileHash =
@@ -438,7 +438,7 @@ export type FieldOutputTypes = {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly description: Varchar<255> | null;
       readonly id: CodecTypes['pg/int4@1']['output'];
-      readonly name: 'CUSTOMER' | 'SUPER_ADMIN' | 'ADMIN' | 'ORDER_MANAGER' | 'CONTENT_MANAGER';
+      readonly name: Varchar<50>;
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     };
     readonly RolePermission: {
@@ -671,7 +671,7 @@ export type FieldInputTypes = {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly description: CodecTypes['sql/varchar@1']['input'] | null;
       readonly id: CodecTypes['pg/int4@1']['input'];
-      readonly name: 'CUSTOMER' | 'SUPER_ADMIN' | 'ADMIN' | 'ORDER_MANAGER' | 'CONTENT_MANAGER';
+      readonly name: CodecTypes['sql/varchar@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
     };
     readonly RolePermission: {
@@ -909,7 +909,7 @@ export type StorageColumnTypes = {
       readonly created_at: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly description: Varchar<255> | null;
       readonly id: CodecTypes['pg/int4@1']['output'];
-      readonly name: 'CUSTOMER' | 'SUPER_ADMIN' | 'ADMIN' | 'ORDER_MANAGER' | 'CONTENT_MANAGER';
+      readonly name: Varchar<50>;
       readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['output'];
     };
     readonly shipments: {
@@ -1142,7 +1142,7 @@ export type StorageColumnInputTypes = {
       readonly created_at: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly description: CodecTypes['sql/varchar@1']['input'] | null;
       readonly id: CodecTypes['pg/int4@1']['input'];
-      readonly name: 'CUSTOMER' | 'SUPER_ADMIN' | 'ADMIN' | 'ORDER_MANAGER' | 'CONTENT_MANAGER';
+      readonly name: CodecTypes['sql/varchar@1']['input'];
       readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['input'];
     };
     readonly shipments: {
@@ -1424,7 +1424,7 @@ export namespace Models {
     createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     description: Varchar<255> | null;
     id: CodecTypes['pg/int4@1']['output'];
-    name: 'CUSTOMER' | 'SUPER_ADMIN' | 'ADMIN' | 'ORDER_MANAGER' | 'CONTENT_MANAGER';
+    name: Varchar<50>;
     updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     permissions: public_RolePermission[];
     users: public_UserRole[];
@@ -3016,10 +3016,10 @@ type ContractBase = Omit<
                   };
                 };
                 readonly name: {
-                  readonly nativeType: 'role_name';
-                  readonly codecId: 'pg/enum@1';
+                  readonly nativeType: 'character varying';
+                  readonly codecId: 'sql/varchar@1';
                   readonly nullable: false;
-                  readonly typeParams: { readonly typeName: 'role_name' };
+                  readonly typeParams: { readonly length: 50 };
                 };
                 readonly updated_at: {
                   readonly nativeType: 'timestamp';
@@ -3311,16 +3311,6 @@ type ContractBase = Omit<
             readonly ProductStatus: {
               readonly kind: 'valueSet';
               readonly values: readonly ['ACTIVE', 'INACTIVE', 'ARCHIVED'];
-            };
-            readonly RoleName: {
-              readonly kind: 'valueSet';
-              readonly values: readonly [
-                'CUSTOMER',
-                'SUPER_ADMIN',
-                'ADMIN',
-                'ORDER_MANAGER',
-                'CONTENT_MANAGER',
-              ];
             };
             readonly ShipmentStatus: {
               readonly kind: 'valueSet';
@@ -5124,8 +5114,8 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/enum@1';
-                  readonly typeParams: { readonly typeName: 'role_name' };
+                  readonly codecId: 'sql/varchar@1';
+                  readonly typeParams: { readonly length: 50 };
                 };
               };
               readonly updatedAt: {
