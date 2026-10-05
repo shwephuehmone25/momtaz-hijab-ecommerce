@@ -1,0 +1,610 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum CartStatus {
+  ACTIVE
+  ABANDONED
+  CONVERTED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PaymentMethod {
+  AMERICAN_EXPRESS
+  APPLE_PAY
+  DINERS_CLUB
+  DISCOVER
+  GOOGLE_PAY
+  MASTERCARD
+  SHOP_PAY
+  VISA
+}
+
+enum ShipmentStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  IN_TRANSIT
+  DELIVERED
+  RETURNED
+  CANCELLED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+// ============================================================
+// CUSTOMER
+// ============================================================
+
+model Customer {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(100)
+  email        String   @unique @db.VarChar(100)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  phone        String?  @db.VarChar(20)
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  addresses Address[]
+  carts     Cart[]
+  orders    Order[]
+  reviews   Review[]
+
+  @@map("customers")
+}
+
+// ============================================================
+// CUSTOMER ADDRESS
+// ============================================================
+
+model Address {
+  id           Int      @id @default(autoincrement())
+  customerId   Int      @map("customer_id")
+
+  addressLine1 String   @map("address_line1") @db.VarChar(255)
+  addressLine2 String?  @map("address_line2") @db.VarChar(255)
+  city         String   @db.VarChar(100)
+  state        String?  @db.VarChar(100)
+  postalCode   String?  @map("postal_code") @db.VarChar(20)
+  country      String   @db.VarChar(100)
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  customer       Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@map("addresses")
+}
+
+// ============================================================
+// CATEGORY
+// ============================================================
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  parentId    Int?     @map("parent_id")
+
+  name        String   @db.VarChar(100)
+  description String?
+  imageUrl    String?  @map("image_url") @db.VarChar(255)
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  parent      Category?  @relation(
+    "CategoryHierarchy",
+    fields: [parentId],
+    references: [id],
+    onDelete: SetNull
+  )
+
+  children    Category[] @relation("CategoryHierarchy")
+  products    Product[]
+
+  @@index([parentId])
+  @@map("categories")
+}
+
+// ============================================================
+// PRODUCT
+// ============================================================
+
+model Product {
+  id          Int           @id @default(autoincrement())
+  categoryId  Int           @map("category_id")
+
+  name        String        @db.VarChar(150)
+  description String?
+
+  status      ProductStatus @default(ACTIVE)
+
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  category    Category         @relation(
+    fields: [categoryId],
+    references: [id],
+    onDelete: Restrict
+  )
+
+  variants    ProductVariant[]
+  images      ProductImage[]
+  reviews     Review[]
+
+  // Optimized for storefront category/status filtering.
+  @@index([categoryId, status])
+
+  @@map("products")
+}
+
+// ============================================================
+// PRODUCT VARIANT
+// ============================================================
+
+model ProductVariant {
+  id              Int           @id @default(autoincrement())
+  productId       Int           @map("product_id")
+
+  sku             String        @unique @db.VarChar(50)
+
+  color           String?       @db.VarChar(50)
+  style           String?       @db.VarChar(50)
+  size            String?       @db.VarChar(50)
+
+  price           Decimal       @db.Decimal(10, 2)
+  compareAtPrice  Decimal?      @map("compare_at_price") @db.Decimal(10, 2)
+
+  status          ProductStatus @default(ACTIVE)
+
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  product         Product       @relation(
+    fields: [productId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  inventory       Inventory?
+
+  cartItems       CartItem[]
+  orderItems      OrderItem[]
+
+  @@index([productId, status])
+
+  @@map("product_variants")
+}
+
+// ============================================================
+// PRODUCT IMAGE
+// ============================================================
+
+model ProductImage {
+  id          Int      @id @default(autoincrement())
+  productId   Int      @map("product_id")
+
+  imageUrl    String   @map("image_url") @db.VarChar(500)
+  sortOrder   Int      @default(0) @map("sort_order")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  product     Product  @relation(
+    fields: [productId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  @@index([productId, sortOrder])
+
+  @@map("product_images")
+}
+
+// ============================================================
+// INVENTORY
+// ============================================================
+
+model Inventory {
+  id               Int      @id @default(autoincrement())
+  variantId        Int      @unique @map("variant_id")
+
+  quantity         Int      @default(0)
+  reservedQuantity  Int      @default(0) @map("reserved_quantity")
+
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  variant           ProductVariant @relation(
+    fields: [variantId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  @@map("inventory")
+}
+
+// ============================================================
+// CART
+// ============================================================
+
+model Cart {
+  id          Int        @id @default(autoincrement())
+  customerId  Int        @map("customer_id")
+
+  status      CartStatus @default(ACTIVE)
+
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  customer    Customer   @relation(
+    fields: [customerId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  items       CartItem[]
+
+  @@index([customerId, status])
+
+  @@map("carts")
+}
+
+// ============================================================
+// CART ITEM
+// ============================================================
+
+model CartItem {
+  id               Int      @id @default(autoincrement())
+  cartId           Int      @map("cart_id")
+  productVariantId Int      @map("product_variant_id")
+
+  quantity         Int
+  unitPrice        Decimal  @map("unit_price") @db.Decimal(10, 2)
+
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  cart             Cart          @relation(
+    fields: [cartId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  productVariant   ProductVariant @relation(
+    fields: [productVariantId],
+    references: [id],
+    onDelete: Restrict
+  )
+
+  // Prevent the same variant from appearing twice in one cart.
+  @@unique([cartId, productVariantId])
+
+  @@index([productVariantId])
+
+  @@map("cart_items")
+}
+
+// ============================================================
+// ORDER
+// ============================================================
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  customerId  Int         @map("customer_id")
+
+  status      OrderStatus @default(PENDING)
+
+  // ----------------------------------------------------------
+  // Shipping address snapshot
+  // These values preserve the address used when ordering.
+  // ----------------------------------------------------------
+
+  shippingName         String  @map("shipping_name") @db.VarChar(100)
+  shippingPhone        String  @map("shipping_phone") @db.VarChar(20)
+  shippingAddressLine1 String  @map("shipping_address_line1") @db.VarChar(255)
+  shippingAddressLine2 String? @map("shipping_address_line2") @db.VarChar(255)
+  shippingCity         String  @map("shipping_city") @db.VarChar(100)
+  shippingState        String? @map("shipping_state") @db.VarChar(100)
+  shippingPostalCode   String? @map("shipping_postal_code") @db.VarChar(20)
+  shippingCountry      String  @map("shipping_country") @db.VarChar(100)
+
+  // ----------------------------------------------------------
+  // Billing address snapshot
+  // ----------------------------------------------------------
+
+  billingName         String  @map("billing_name") @db.VarChar(100)
+  billingPhone        String  @map("billing_phone") @db.VarChar(20)
+  billingAddressLine1 String  @map("billing_address_line1") @db.VarChar(255)
+  billingAddressLine2 String? @map("billing_address_line2") @db.VarChar(255)
+  billingCity         String  @map("billing_city") @db.VarChar(100)
+  billingState        String? @map("billing_state") @db.VarChar(100)
+  billingPostalCode   String? @map("billing_postal_code") @db.VarChar(20)
+  billingCountry      String  @map("billing_country") @db.VarChar(100)
+
+  // ----------------------------------------------------------
+  // Financial snapshot
+  // ----------------------------------------------------------
+
+  subtotal            Decimal @db.Decimal(10, 2)
+  shippingFee         Decimal @map("shipping_fee") @db.Decimal(10, 2)
+  discountAmount      Decimal @default(0) @map("discount_amount") @db.Decimal(10, 2)
+  total               Decimal @db.Decimal(10, 2)
+
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  customer            Customer @relation(
+    fields: [customerId],
+    references: [id],
+    onDelete: Restrict
+  )
+
+  items               OrderItem[]
+  payments            Payment[]
+  shipments           Shipment[]
+  coupons             OrderCoupon[]
+
+  // Customer order history.
+  @@index([customerId, createdAt])
+
+  // Useful for admin order management.
+  @@index([status, createdAt])
+
+  @@map("orders")
+}
+
+// ============================================================
+// ORDER ITEM
+// ============================================================
+
+model OrderItem {
+  id              Int      @id @default(autoincrement())
+  orderId         Int      @map("order_id")
+  variantId       Int      @map("variant_id")
+
+  // Historical product information.
+  // These remain unchanged even if the catalog changes.
+  productName     String   @map("product_name") @db.VarChar(150)
+  sku             String   @db.VarChar(50)
+
+  quantity        Int
+
+  unitPrice       Decimal  @map("unit_price") @db.Decimal(10, 2)
+  totalPrice      Decimal  @map("total_price") @db.Decimal(10, 2)
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  order           Order         @relation(
+    fields: [orderId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  variant         ProductVariant @relation(
+    fields: [variantId],
+    references: [id],
+    onDelete: Restrict
+  )
+
+  @@index([orderId])
+  @@index([variantId])
+
+  @@map("order_items")
+}
+
+// ============================================================
+// PAYMENT
+// ============================================================
+
+model Payment {
+  id              Int           @id @default(autoincrement())
+  orderId         Int           @map("order_id")
+
+  paymentMethod   PaymentMethod @map("payment_method")
+  transactionRef  String?       @map("transaction_ref") @db.VarChar(100)
+
+  amount          Decimal       @db.Decimal(10, 2)
+  status          PaymentStatus @default(PENDING)
+
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  order           Order         @relation(
+    fields: [orderId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  @@index([orderId, createdAt])
+  @@index([transactionRef])
+
+  @@map("payments")
+}
+
+// ============================================================
+// SHIPMENT
+// ============================================================
+
+model Shipment {
+  id              Int            @id @default(autoincrement())
+  orderId         Int            @map("order_id")
+
+  trackingNumber  String?        @map("tracking_number") @db.VarChar(100)
+  carrier         String?        @db.VarChar(50)
+
+  status          ShipmentStatus @default(PENDING)
+
+  shippedAt       DateTime?      @map("shipped_at")
+  deliveredAt     DateTime?      @map("delivered_at")
+
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  order           Order          @relation(
+    fields: [orderId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  @@index([orderId])
+  @@index([trackingNumber])
+
+  @@map("shipments")
+}
+
+// ============================================================
+// COUPON
+// ============================================================
+
+model Coupon {
+  id              Int          @id @default(autoincrement())
+  code            String       @unique @db.VarChar(50)
+
+  discountType    DiscountType @map("discount_type")
+  discountValue  Decimal      @map("discount_value") @db.Decimal(10, 2)
+
+  expiresAt       DateTime?    @map("expires_at")
+
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  orders           OrderCoupon[]
+
+  @@index([expiresAt])
+
+  @@map("coupons")
+}
+
+// ============================================================
+// ORDER COUPON
+// ============================================================
+
+model OrderCoupon {
+  orderId          Int      @map("order_id")
+  couponId         Int      @map("coupon_id")
+
+  discountAmount   Decimal  @map("discount_amount") @db.Decimal(10, 2)
+
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  order            Order    @relation(
+    fields: [orderId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  coupon           Coupon   @relation(
+    fields: [couponId],
+    references: [id],
+    onDelete: Restrict
+  )
+
+  @@id([orderId, couponId])
+
+  @@index([couponId])
+
+  @@map("order_coupons")
+}
+
+// ============================================================
+// REVIEW
+// ============================================================
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  customerId  Int      @map("customer_id")
+  productId   Int      @map("product_id")
+
+  rating      Int
+  comment     String?
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  customer    Customer @relation(
+    fields: [customerId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  product     Product  @relation(
+    fields: [productId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  // One customer should not review the same product repeatedly.
+  @@unique([customerId, productId])
+
+  @@index([productId, createdAt])
+
+  @@map("reviews")
+}
+
+// ============================================================
+// NEWSLETTER
+// ============================================================
+
+model NewsletterSubscriber {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique @db.VarChar(100)
+
+  subscribedAt DateTime @default(now()) @map("subscribed_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("newsletter_subscribers")
+}
+
+// ============================================================
+// CONTACT MESSAGE
+// ============================================================
+
+model ContactMessage {
+  id          Int      @id @default(autoincrement())
+
+  name        String   @db.VarChar(100)
+  email       String   @db.VarChar(100)
+  subject     String   @db.VarChar(150)
+  message     String
+
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+
+  @@map("contact_messages")
+}
