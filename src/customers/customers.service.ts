@@ -3,6 +3,7 @@ import { db } from '../database/db';
 import { hashPassword } from '../common/security/password';
 import { throwIfUniqueViolation } from '../common/database/database-error';
 import { varchar } from '../common/database/varchar';
+import { or } from '@prisma/orm-postgres/orm-client';
 import { CreateCustomerDto, UpdateCustomerDto } from './dto';
 
 const customerFields = [
@@ -32,14 +33,26 @@ export class CustomersService {
     }
   }
 
-  async findAll(page: number, limit: number) {
+  async findAll(page: number, limit: number, search?: string) {
+    const searchPattern = search?.trim();
+    const customers = db.orm.public.Customer.select(...customerFields);
+    const filteredCustomers = searchPattern
+      ? customers.where((customer) =>
+          or(
+            customer.name.ilike(`%${searchPattern}%`),
+            customer.email.ilike(`%${searchPattern}%`),
+            customer.phone.ilike(`%${searchPattern}%`),
+          ),
+        )
+      : customers;
+
     const [items, totalResult] = await Promise.all([
-      db.orm.public.Customer.select(...customerFields)
+      filteredCustomers
         .orderBy((customer) => customer.createdAt.desc())
         .limit(limit)
         .offset((page - 1) * limit)
         .all(),
-      db.orm.public.Customer.aggregate((aggregate) => ({
+      filteredCustomers.aggregate((aggregate) => ({
         total: aggregate.count(),
       })),
     ]);

@@ -19,9 +19,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { PaginationQueryDto } from '../common/dto';
 import { CustomersService } from './customers.service';
-import { CreateCustomerDto, UpdateCustomerDto } from './dto';
+import {
+  CreateCustomerDto,
+  CustomersQueryDto,
+  UpdateCustomerDto,
+} from './dto';
 
 @ApiTags('Customers')
 @Controller('api/v1/admin/customers')
@@ -39,8 +42,8 @@ export class CustomersController {
   @Get()
   @ApiOperation({ summary: 'List customers' })
   @ApiOkResponse({ description: 'Paginated customer list' })
-  findAll(@Query() query: PaginationQueryDto) {
-    return this.customersService.findAll(query.page, query.limit);
+  findAll(@Query() query: CustomersQueryDto) {
+    return this.customersService.findAll(query.page, query.limit, query.search);
   }
 
   @Get(':id')
