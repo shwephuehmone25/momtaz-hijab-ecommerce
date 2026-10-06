@@ -6,6 +6,10 @@ import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { CategoriesModule } from './categories/categories.module';
+import { ProductsModule } from './products/products.module';
+import { ProductVariantsModule } from './product-variants/product-variants.module';
+import { InventoryModule } from './inventory/inventory.module';
 
 @Module({
   imports: [
@@ -13,6 +17,10 @@ import { AddressesModule } from './addresses/addresses.module';
     AuthModule,
     CustomersModule,
     AddressesModule,
+    CategoriesModule,
+    ProductsModule,
+    ProductVariantsModule,
+    InventoryModule,
     UsersModule,
   ],
   controllers: [AppController],
