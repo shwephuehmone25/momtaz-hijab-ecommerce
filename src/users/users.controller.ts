@@ -19,13 +19,17 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { PaginationQueryDto } from '../common/dto';
+import { CreateUserDto, UpdateUserDto } from './dto';
 import { UsersService } from './users.service';
+import { UseGuards } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { SuperAdminGuard } from '../auth/auth.guard';
 
 @ApiTags('Users')
 @Controller('users')
+@UseGuards(SuperAdminGuard)
+@ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

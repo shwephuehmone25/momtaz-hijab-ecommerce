@@ -3,9 +3,7 @@ import { db } from '../database/db';
 import { hashPassword } from '../common/security/password';
 import { throwIfUniqueViolation } from '../common/database/database-error';
 import { varchar } from '../common/database/varchar';
-import { CreateUserDto } from './dto/create-user.dto';
-import { RoleName } from './dto/user-enums';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto, RoleName, UpdateUserDto } from './dto';
 
 const userFields = [
   'id',
