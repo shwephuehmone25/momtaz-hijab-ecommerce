@@ -6,6 +6,13 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableShutdownHooks();
+  app.enableCors({
+    origin: (
+      process.env.CORS_ORIGINS || 'http://localhost:8080,http://127.0.0.1:8080'
+    )
+      .split(',')
+      .map((value) => value.trim()),
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({

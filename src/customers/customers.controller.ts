@@ -19,13 +19,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { PaginationQueryDto } from '../common/dto';
 import { CustomersService } from './customers.service';
-import { CreateCustomerDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { CreateCustomerDto, UpdateCustomerDto } from './dto';
 
 @ApiTags('Customers')
-@Controller('customers')
+@Controller('api/v1/admin/customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 

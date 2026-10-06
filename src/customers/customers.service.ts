@@ -3,8 +3,7 @@ import { db } from '../database/db';
 import { hashPassword } from '../common/security/password';
 import { throwIfUniqueViolation } from '../common/database/database-error';
 import { varchar } from '../common/database/varchar';
-import { CreateCustomerDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { CreateCustomerDto, UpdateCustomerDto } from './dto';
 
 const customerFields = [
   'id',
