@@ -1,4 +1,4 @@
-import { db } from '../src/database/db';
+import { db, initializeDatabase } from '../src/database/db';
 import { varchar } from '../src/common/database/varchar';
 import { hashPassword } from '../src/common/security/password';
 import { RoleName } from '../src/users/dto/user-enums';
@@ -52,6 +52,8 @@ const roleDefinitions: Record<
 
 async function main(): Promise<void> {
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not defined');
+  await initializeDatabase();
+
   const email = (process.env.SEED_ADMIN_EMAIL ?? 'admin@gmail.com')
     .trim()
     .toLowerCase();
@@ -142,5 +144,5 @@ main()
     process.exitCode = 1;
   })
   .finally(async () => {
-    await db.close();
+    await db?.close();
   });

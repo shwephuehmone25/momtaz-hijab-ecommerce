@@ -2,9 +2,10 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { initializeDatabase } from './database/db';
 
 async function bootstrap() {
-  await import('temporal-polyfill/full/global');
+  await initializeDatabase();
 
   const app = await NestFactory.create(AppModule);
   app.enableShutdownHooks();
