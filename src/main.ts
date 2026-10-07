@@ -4,6 +4,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  await import('temporal-polyfill/full/global');
+
   const app = await NestFactory.create(AppModule);
   app.enableShutdownHooks();
   app.enableCors({
