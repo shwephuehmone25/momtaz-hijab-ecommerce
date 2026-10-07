@@ -20,11 +20,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CustomersService } from './customers.service';
-import {
-  CreateCustomerDto,
-  CustomersQueryDto,
-  UpdateCustomerDto,
-} from './dto';
+import { CreateCustomerDto, CustomersQueryDto, UpdateCustomerDto } from './dto';
 
 @ApiTags('Customers')
 @Controller('api/v1/admin/customers')
