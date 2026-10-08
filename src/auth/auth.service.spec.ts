@@ -18,7 +18,7 @@ describe('Admin authentication', () => {
     permissions: ['*'],
   };
   beforeEach(async () => {
-    process.env.JWT_SECRET =
+    process.env.JWT_PUBLIC_KEY =
       'test-secret-only-with-at-least-thirty-two-characters';
     service = new AuthService(new JwtService());
     const first = jest.fn().mockResolvedValue({

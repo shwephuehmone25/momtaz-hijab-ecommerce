@@ -25,13 +25,13 @@ export class AuthService {
   // Sessions intentionally expire on process restart; no raw refresh tokens are stored.
   private readonly sessions = new Map<string, Session>();
   private readonly secret =
-    process.env.JWT_SECRET ||
+    process.env.JWT_PUBLIC_KEY ||
     (process.env.NODE_ENV === 'production'
       ? ''
       : randomBytes(48).toString('hex'));
   constructor(private readonly jwt: JwtService) {
     if (this.secret.length < 32)
-      throw new Error('JWT_SECRET must contain at least 32 characters');
+      throw new Error('JWT_PUBLIC_KEY must contain at least 32 characters');
   }
   async profile(id: number) {
     const user = await db.orm.public.User.select(
