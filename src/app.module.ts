@@ -10,6 +10,8 @@ import { CategoriesModule } from './categories/categories.module';
 import { ProductsModule } from './products/products.module';
 import { ProductVariantsModule } from './product-variants/product-variants.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { CartsModule } from './carts/carts.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { InventoryModule } from './inventory/inventory.module';
     ProductsModule,
     ProductVariantsModule,
     InventoryModule,
+    CartsModule,
+    DashboardModule,
     UsersModule,
   ],
   controllers: [AppController],
