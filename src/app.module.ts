@@ -12,6 +12,7 @@ import { ProductVariantsModule } from './product-variants/product-variants.modul
 import { InventoryModule } from './inventory/inventory.module';
 import { CartsModule } from './carts/carts.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     InventoryModule,
     CartsModule,
     DashboardModule,
+    OrdersModule,
     UsersModule,
   ],
   controllers: [AppController],
