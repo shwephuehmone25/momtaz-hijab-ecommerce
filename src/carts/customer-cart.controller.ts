@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -17,13 +18,18 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiBearerAuth,
+  ApiConflictResponse,
 } from '@nestjs/swagger';
+import { CustomerOwnershipGuard } from '../auth/customer-auth.guard';
 import { CartResponse } from './cart.response';
 import { CartsService } from './carts.service';
 import { AddCartItemDto, UpdateCartItemDto } from './dto';
 
 @ApiTags('Customer Cart')
 @Controller('api/v1/customers/:customerId/cart')
+@UseGuards(CustomerOwnershipGuard)
+@ApiBearerAuth()
 export class CustomerCartController {
   constructor(private readonly cartsService: CartsService) {}
 
@@ -33,6 +39,15 @@ export class CustomerCartController {
   @ApiNotFoundResponse({ description: 'Customer not found' })
   findActive(@Param('customerId', ParseIntPipe) customerId: number) {
     return this.cartsService.getActiveCart(customerId);
+  }
+
+  @Post()
+  @ApiOperation({ summary: "Create a customer's active cart" })
+  @ApiCreatedResponse({ type: CartResponse })
+  @ApiNotFoundResponse({ description: 'Customer not found' })
+  @ApiConflictResponse({ description: 'Customer already has an active cart' })
+  create(@Param('customerId', ParseIntPipe) customerId: number) {
+    return this.cartsService.createActiveCart(customerId);
   }
 
   @Post('items')

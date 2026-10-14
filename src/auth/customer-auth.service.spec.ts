@@ -1,0 +1,73 @@
+jest.mock('../database/db', () => ({
+  db: { orm: { public: { Customer: { select: jest.fn() } } } },
+}));
+
+import { JwtService } from '@nestjs/jwt';
+import { hashPassword } from '../common/security/password';
+import { db } from '../database/db';
+import { CustomerAuthService } from './customer-auth.service';
+
+describe('Customer authentication', () => {
+  let service: CustomerAuthService;
+  let first: jest.Mock;
+
+  beforeEach(async () => {
+    process.env.JWT_PUBLIC_KEY =
+      'test-secret-only-with-at-least-thirty-two-characters';
+    service = new CustomerAuthService(new JwtService());
+    first = jest.fn();
+    const query = { where: () => query, first };
+    (db.orm.public.Customer.select as jest.Mock).mockReturnValue(query);
+    first.mockResolvedValue({
+      id: 7,
+      name: 'Customer',
+      email: 'customer@example.com',
+      passwordHash: await hashPassword('correct-password'),
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    });
+  });
+
+  it('issues a customer-scoped session and authenticates it', async () => {
+    const result = await service.login(
+      'customer@example.com',
+      'correct-password',
+    );
+
+    const authenticated = await service.authenticate(result.access_token);
+
+    expect(authenticated.customer.id).toBe(7);
+    expect(result.user.roles).toEqual([
+      { name: 'CUSTOMER', display_name: 'CUSTOMER' },
+    ]);
+    expect(result.user).not.toHaveProperty('passwordHash');
+  });
+
+  it('rejects invalid credentials and tampered access tokens', async () => {
+    await expect(
+      service.login('customer@example.com', 'wrong-password'),
+    ).rejects.toThrow('Invalid email or password');
+
+    const result = await service.login(
+      'customer@example.com',
+      'correct-password',
+    );
+    await expect(
+      service.authenticate(`${result.access_token}tampered`),
+    ).rejects.toThrow('Invalid or expired customer session');
+  });
+
+  it('rotates refresh tokens and revokes a logged-out session', async () => {
+    const result = await service.login(
+      'customer@example.com',
+      'correct-password',
+    );
+    const refreshed = await service.refresh(result.refresh_token);
+    await expect(service.refresh(result.refresh_token)).rejects.toThrow();
+
+    const authenticated = await service.authenticate(refreshed.access_token);
+    service.logout(authenticated.sid);
+    await expect(
+      service.authenticate(refreshed.access_token),
+    ).rejects.toThrow();
+  });
+});

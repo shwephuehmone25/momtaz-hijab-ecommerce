@@ -35,3 +35,18 @@ export class SuperAdminGuard extends AuthGuard {
     return true;
   }
 }
+
+@Injectable()
+export class AdminGuard extends AuthGuard {
+  async canActivate(context: ExecutionContext) {
+    await super.canActivate(context);
+    const roles = context
+      .switchToHttp()
+      .getRequest<AuthRequest>()
+      .auth.user.roles.map((role) => role.name);
+    if (!roles.some((role) => role === 'ADMIN' || role === 'SUPER_ADMIN')) {
+      throw new ForbiddenException('Admin access required');
+    }
+    return true;
+  }
+}

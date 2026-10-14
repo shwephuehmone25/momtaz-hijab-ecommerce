@@ -4,14 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { throwIfUniqueViolation } from '../common/database/database-error';
 import { db } from '../database/db';
 import {
   AddCartItemDto,
   CartStatus,
   CartsQueryDto,
-  CreateCartDto,
-  UpdateCartDto,
   UpdateCartItemDto,
 } from './dto';
 
@@ -66,6 +63,16 @@ export class CartsService {
           createdAt: null,
           updatedAt: null,
         };
+  }
+
+  async createActiveCart(customerId: number) {
+    await this.requireCustomer(customerId);
+    await this.ensureNoActiveCart(customerId);
+    const cart = await db.orm.public.Cart.select('id').create({
+      customerId,
+      status: CartStatus.ACTIVE,
+    });
+    return this.findOne(cart.id);
   }
 
   async addItem(customerId: number, dto: AddCartItemDto) {
@@ -143,19 +150,6 @@ export class CartsService {
     return this.findOne(cart.id);
   }
 
-  async create(dto: CreateCartDto) {
-    await this.requireCustomer(dto.customerId);
-    const status = dto.status ?? CartStatus.ACTIVE;
-    if (status === CartStatus.ACTIVE) {
-      await this.ensureNoActiveCart(dto.customerId);
-    }
-    const cart = await db.orm.public.Cart.select(...cartFields).create({
-      customerId: dto.customerId,
-      status,
-    });
-    return this.findOne(cart.id);
-  }
-
   async findAll(query: CartsQueryDto) {
     let carts = this.cartQuery();
     if (query.customerId !== undefined) {
@@ -198,82 +192,25 @@ export class CartsService {
     return this.serializeCart(cart);
   }
 
-  async update(id: number, dto: UpdateCartDto) {
-    const current = await db.orm.public.Cart.select(...cartFields).first({
-      id,
-    });
-    if (!current) {
+  async removeByAdmin(id: number) {
+    const cart = await db.orm.public.Cart.select('id', 'status').first({ id });
+    if (!cart) {
       throw new NotFoundException(`Cart ${id} was not found`);
     }
-    const customerId = dto.customerId ?? current.customerId;
-    const status = dto.status ?? current.status;
-    if (dto.customerId !== undefined) {
-      await this.requireCustomer(dto.customerId);
+    if (cart.status !== 'ABANDONED') {
+      throw new ConflictException(
+        'Only abandoned carts can be deleted by an administrator',
+      );
     }
-    if (status === CartStatus.ACTIVE) {
-      await this.ensureNoActiveCart(customerId, id);
-    }
-    await db.orm.public.Cart.where({ id }).update({
-      ...(dto.customerId !== undefined && { customerId: dto.customerId }),
-      ...(dto.status !== undefined && { status: dto.status }),
-    });
-    return this.findOne(id);
-  }
-
-  async remove(id: number) {
-    await this.findOne(id);
     await db.orm.public.Cart.where({ id }).delete();
     return { message: `Cart ${id} deleted` };
   }
 
-  async addAdminItem(cartId: number, dto: AddCartItemDto) {
-    const cart = await db.orm.public.Cart.select('id', 'status').first({
-      id: cartId,
-    });
-    if (!cart) throw new NotFoundException(`Cart ${cartId} was not found`);
-    if (cart.status !== 'ACTIVE') {
-      throw new BadRequestException(
-        'Items can only be added to an active cart',
-      );
-    }
-
-    try {
-      const existing = await db.orm.public.CartItem.select(
-        'id',
-        'quantity',
-      ).first({
-        cartId,
-        productVariantId: dto.productVariantId,
-      });
-      const quantity = (existing?.quantity ?? 0) + dto.quantity;
-      const variant = await this.requirePurchasableVariant(
-        dto.productVariantId,
-        quantity,
-        db,
-      );
-      if (existing) {
-        await db.orm.public.CartItem.where({ id: existing.id }).update({
-          quantity,
-          unitPrice: variant.price,
-        });
-      } else {
-        await db.orm.public.CartItem.create({
-          cartId,
-          productVariantId: dto.productVariantId,
-          quantity,
-          unitPrice: variant.price,
-        });
-      }
-    } catch (error) {
-      throwIfUniqueViolation(
-        error,
-        'This product variant is already in the cart',
-      );
-    }
-    return this.findOne(cartId);
-  }
-
-  async updateItem(cartId: number, itemId: number, dto: UpdateCartItemDto) {
+  private async updateItem(
+    cartId: number,
+    itemId: number,
+    dto: UpdateCartItemDto,
+  ) {
     const item = await db.orm.public.CartItem.select(
       'id',
       'productVariantId',
@@ -298,7 +235,7 @@ export class CartsService {
     return this.findOne(cartId);
   }
 
-  async removeItem(cartId: number, itemId: number) {
+  private async removeItem(cartId: number, itemId: number) {
     const item = await db.orm.public.CartItem.select('id').first({
       id: itemId,
       cartId,
@@ -321,13 +258,13 @@ export class CartsService {
     }
   }
 
-  private async ensureNoActiveCart(customerId: number, exceptId?: number) {
+  private async ensureNoActiveCart(customerId: number) {
     const query = db.orm.public.Cart.select('id').where({
       customerId,
       status: CartStatus.ACTIVE,
     });
     const active = await query.first();
-    if (active && active.id !== exceptId) {
+    if (active) {
       throw new ConflictException(
         `Customer ${customerId} already has an active cart`,
       );
