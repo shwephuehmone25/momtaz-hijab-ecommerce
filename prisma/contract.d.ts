@@ -34,9 +34,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'890dee5a6d3eafe475359916d3c17a43a39e5e3143d124e2c61e5a4bb8f265bd'>;
+  StorageHashBase<'6fdaec233c09b37845dc467978d15767b45f1340ae4ef77089a037b0181519a8'>;
 export type ExecutionHash =
-  ExecutionHashBase<'909c112433208731a9a45cf71ea34f6338e77fcd7c507f707eddb081d9c45b3e'>;
+  ExecutionHashBase<'d1df499c7e780da61729e90e71e88554f24f46df5fa134e95447878438b6369a'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -405,6 +405,23 @@ export type FieldOutputTypes = {
       readonly status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     };
+    readonly ProductAttribute: {
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly name: Varchar<100>;
+      readonly orderBy: CodecTypes['pg/int4@1']['output'];
+      readonly slug: Varchar<100>;
+      readonly type: Varchar<20>;
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    };
+    readonly ProductAttributeValue: {
+      readonly attributeId: CodecTypes['pg/int4@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly orderBy: CodecTypes['pg/int4@1']['output'];
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly value: Varchar<100>;
+    };
     readonly ProductImage: {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
@@ -638,6 +655,23 @@ export type FieldInputTypes = {
       readonly status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
     };
+    readonly ProductAttribute: {
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly name: CodecTypes['sql/varchar@1']['input'];
+      readonly orderBy: CodecTypes['pg/int4@1']['input'];
+      readonly slug: CodecTypes['sql/varchar@1']['input'];
+      readonly type: CodecTypes['sql/varchar@1']['input'];
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+    };
+    readonly ProductAttributeValue: {
+      readonly attributeId: CodecTypes['pg/int4@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly orderBy: CodecTypes['pg/int4@1']['input'];
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly value: CodecTypes['sql/varchar@1']['input'];
+    };
     readonly ProductImage: {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
@@ -860,6 +894,23 @@ export type StorageColumnTypes = {
       readonly created_at: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly description: Varchar<255> | null;
       readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['output'];
+    };
+    readonly product_attribute_values: {
+      readonly attribute_id: CodecTypes['pg/int4@1']['output'];
+      readonly created_at: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly order_by: CodecTypes['pg/int4@1']['output'];
+      readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly value: Varchar<100>;
+    };
+    readonly product_attributes: {
+      readonly created_at: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly name: Varchar<100>;
+      readonly order_by: CodecTypes['pg/int4@1']['output'];
+      readonly slug: Varchar<100>;
+      readonly type: Varchar<20>;
       readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['output'];
     };
     readonly product_images: {
@@ -1093,6 +1144,23 @@ export type StorageColumnInputTypes = {
       readonly created_at: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly description: CodecTypes['sql/varchar@1']['input'] | null;
       readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['input'];
+    };
+    readonly product_attribute_values: {
+      readonly attribute_id: CodecTypes['pg/int4@1']['input'];
+      readonly created_at: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly order_by: CodecTypes['pg/int4@1']['input'];
+      readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly value: CodecTypes['sql/varchar@1']['input'];
+    };
+    readonly product_attributes: {
+      readonly created_at: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly name: CodecTypes['sql/varchar@1']['input'];
+      readonly order_by: CodecTypes['pg/int4@1']['input'];
+      readonly slug: CodecTypes['sql/varchar@1']['input'];
+      readonly type: CodecTypes['sql/varchar@1']['input'];
       readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['input'];
     };
     readonly product_images: {
@@ -1381,6 +1449,27 @@ export namespace Models {
     variants: public_ProductVariant[];
     readonly [RelationKeys]?: 'category' | 'images' | 'reviews' | 'variants';
   };
+  export type public_ProductAttribute = {
+    createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    id: CodecTypes['pg/int4@1']['output'];
+    name: Varchar<100>;
+    orderBy: CodecTypes['pg/int4@1']['output'];
+    slug: Varchar<100>;
+    type: Varchar<20>;
+    updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    values: public_ProductAttributeValue[];
+    readonly [RelationKeys]?: 'values';
+  };
+  export type public_ProductAttributeValue = {
+    attributeId: CodecTypes['pg/int4@1']['output'];
+    createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    id: CodecTypes['pg/int4@1']['output'];
+    orderBy: CodecTypes['pg/int4@1']['output'];
+    updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    value: Varchar<100>;
+    attribute: public_ProductAttribute;
+    readonly [RelationKeys]?: 'attribute';
+  };
   export type public_ProductImage = {
     createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     id: CodecTypes['pg/int4@1']['output'];
@@ -1491,6 +1580,8 @@ export declare const models: {
     Payment: Models.public_Payment;
     Permission: Models.public_Permission;
     Product: Models.public_Product;
+    ProductAttribute: Models.public_ProductAttribute;
+    ProductAttributeValue: Models.public_ProductAttributeValue;
     ProductImage: Models.public_ProductImage;
     ProductVariant: Models.public_ProductVariant;
     Review: Models.public_Review;
@@ -2606,6 +2697,147 @@ type ContractBase = Omit<
               ];
               foreignKeys: readonly [];
             };
+            readonly product_attribute_values: {
+              columns: {
+                readonly attribute_id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly created_at: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly order_by: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
+                };
+                readonly updated_at: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly value: {
+                  readonly nativeType: 'character varying';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly length: 100 };
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'product_attribute_values_attribute_id_order_by_idx';
+                  readonly columns: readonly ['attribute_id', 'order_by'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'product_attribute_values_attribute_id_value_key';
+                  readonly columns: readonly ['attribute_id', 'value'];
+                  readonly unique: true;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'product_attribute_values';
+                    readonly columns: readonly ['attribute_id'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'product_attributes';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly product_attributes: {
+              columns: {
+                readonly created_at: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly name: {
+                  readonly nativeType: 'character varying';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly length: 100 };
+                };
+                readonly order_by: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
+                };
+                readonly slug: {
+                  readonly nativeType: 'character varying';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly length: 100 };
+                };
+                readonly type: {
+                  readonly nativeType: 'character varying';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'sql/varchar@1', 'select'>;
+                  };
+                  readonly typeParams: { readonly length: 20 };
+                };
+                readonly updated_at: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'product_attributes_slug_key';
+                  readonly columns: readonly ['slug'];
+                  readonly unique: true;
+                },
+              ];
+              foreignKeys: readonly [];
+            };
             readonly product_images: {
               columns: {
                 readonly created_at: {
@@ -3377,6 +3609,14 @@ type ContractBase = Omit<
     readonly permissions: {
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'Permission';
+    };
+    readonly product_attribute_values: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'ProductAttributeValue';
+    };
+    readonly product_attributes: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'ProductAttribute';
     };
     readonly product_images: {
       readonly namespace: 'public' & NamespaceId;
@@ -4813,6 +5053,150 @@ type ContractBase = Omit<
               };
             };
           };
+          readonly ProductAttribute: {
+            readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly name: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly typeParams: { readonly length: 100 };
+                };
+              };
+              readonly orderBy: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly slug: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly typeParams: { readonly length: 100 };
+                };
+              };
+              readonly type: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly typeParams: { readonly length: 20 };
+                };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: {
+              readonly values: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ProductAttributeValue';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['attributeId'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'product_attributes';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'created_at' };
+                readonly id: { readonly column: 'id' };
+                readonly name: { readonly column: 'name' };
+                readonly orderBy: { readonly column: 'order_by' };
+                readonly slug: { readonly column: 'slug' };
+                readonly type: { readonly column: 'type' };
+                readonly updatedAt: { readonly column: 'updated_at' };
+              };
+            };
+          };
+          readonly ProductAttributeValue: {
+            readonly fields: {
+              readonly attributeId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly orderBy: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly value: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly typeParams: { readonly length: 100 };
+                };
+              };
+            };
+            readonly relations: {
+              readonly attribute: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ProductAttribute';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['attributeId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'product_attribute_values';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly attributeId: { readonly column: 'attribute_id' };
+                readonly createdAt: { readonly column: 'created_at' };
+                readonly id: { readonly column: 'id' };
+                readonly orderBy: { readonly column: 'order_by' };
+                readonly updatedAt: { readonly column: 'updated_at' };
+                readonly value: { readonly column: 'value' };
+              };
+            };
+          };
           readonly ProductImage: {
             readonly fields: {
               readonly createdAt: {
@@ -5586,6 +5970,24 @@ type ContractBase = Omit<
           readonly onUpdate: { readonly id: 'plainDateTimeNow'; readonly kind: 'generator' };
           readonly ref: {
             readonly entry: 'permissions';
+            readonly field: 'updated_at';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'plainDateTimeNow'; readonly kind: 'generator' };
+          readonly onUpdate: { readonly id: 'plainDateTimeNow'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'product_attribute_values';
+            readonly field: 'updated_at';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'plainDateTimeNow'; readonly kind: 'generator' };
+          readonly onUpdate: { readonly id: 'plainDateTimeNow'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'product_attributes';
             readonly field: 'updated_at';
             readonly namespace: 'public';
           };

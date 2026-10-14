@@ -12,6 +12,8 @@ import {
   Query,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -19,7 +21,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateProductDto, ProductsQueryDto, UpdateProductDto } from './dto';
-import { PaginatedProductsResponse, ProductResponse } from './product.response';
+import {
+  PaginatedProductsResponse,
+  ProductDetailResponse,
+  ProductResponse,
+} from './product.response';
 import { ProductsService } from './products.service';
 
 @ApiTags('Products')
@@ -29,8 +35,10 @@ export class ProductsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a product' })
-  @ApiCreatedResponse({ type: ProductResponse })
+  @ApiCreatedResponse({ type: ProductDetailResponse })
   @ApiNotFoundResponse({ description: 'Category not found' })
+  @ApiBadRequestResponse({ description: 'Invalid variant or stock data' })
+  @ApiConflictResponse({ description: 'Duplicate variant SKU' })
   create(@Body() dto: CreateProductDto) {
     return this.productsService.create(dto);
   }
@@ -44,7 +52,7 @@ export class ProductsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a product' })
-  @ApiOkResponse({ type: ProductResponse })
+  @ApiOkResponse({ type: ProductDetailResponse })
   @ApiNotFoundResponse({ description: 'Product not found' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findOne(id);
@@ -52,8 +60,14 @@ export class ProductsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a product' })
-  @ApiOkResponse({ type: ProductResponse })
+  @ApiOkResponse({ type: ProductDetailResponse })
   @ApiNotFoundResponse({ description: 'Product or category not found' })
+  @ApiBadRequestResponse({
+    description: 'Invalid variant synchronization data',
+  })
+  @ApiConflictResponse({
+    description: 'Duplicate SKU or a removed variant is still referenced',
+  })
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateProductDto) {
     return this.productsService.update(id, dto);
   }

@@ -1,0 +1,239 @@
+[
+  {
+    "id": "table.product_attribute_values",
+    "label": "Create table \"product_attribute_values\"",
+    "summary": "Creates table \"product_attribute_values\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "product_attribute_values"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"product_attribute_values\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"product_attribute_values\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"product_attribute_values\"",
+        "sql": "CREATE TABLE \"public\".\"product_attribute_values\" (\n  \"attribute_id\" int4 NOT NULL,\n  \"created_at\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"order_by\" int4 DEFAULT 0 NOT NULL,\n  \"updated_at\" timestamp(3) NOT NULL,\n  \"value\" character varying(100) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"product_attribute_values\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"product_attribute_values\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.product_attributes",
+    "label": "Create table \"product_attributes\"",
+    "summary": "Creates table \"product_attributes\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "product_attributes"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"product_attributes\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"product_attributes\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"product_attributes\"",
+        "sql": "CREATE TABLE \"public\".\"product_attributes\" (\n  \"created_at\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" character varying(100) NOT NULL,\n  \"order_by\" int4 DEFAULT 0 NOT NULL,\n  \"slug\" character varying(100) NOT NULL,\n  \"type\" character varying(20) DEFAULT 'select' NOT NULL,\n  \"updated_at\" timestamp(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"product_attributes\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"product_attributes\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.product_attribute_values.product_attribute_values_attribute_id_order_by_idx",
+    "label": "Create index \"product_attribute_values_attribute_id_order_by_idx\" on \"product_attribute_values\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "product_attribute_values_attribute_id_order_by_idx",
+        "table": "product_attribute_values"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"product_attribute_values_attribute_id_order_by_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"product_attribute_values_attribute_id_order_by_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"product_attribute_values_attribute_id_order_by_idx\"",
+        "sql": "CREATE INDEX \"product_attribute_values_attribute_id_order_by_idx\" ON \"public\".\"product_attribute_values\" (\"attribute_id\", \"order_by\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"product_attribute_values_attribute_id_order_by_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"product_attribute_values_attribute_id_order_by_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.product_attribute_values.product_attribute_values_attribute_id_value_key",
+    "label": "Create index \"product_attribute_values_attribute_id_value_key\" on \"product_attribute_values\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "product_attribute_values_attribute_id_value_key",
+        "table": "product_attribute_values"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"product_attribute_values_attribute_id_value_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"product_attribute_values_attribute_id_value_key\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"product_attribute_values_attribute_id_value_key\"",
+        "sql": "CREATE UNIQUE INDEX \"product_attribute_values_attribute_id_value_key\" ON \"public\".\"product_attribute_values\" (\"attribute_id\", \"value\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"product_attribute_values_attribute_id_value_key\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"product_attribute_values_attribute_id_value_key\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.product_attributes.product_attributes_slug_key",
+    "label": "Create index \"product_attributes_slug_key\" on \"product_attributes\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "product_attributes_slug_key",
+        "table": "product_attributes"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"product_attributes_slug_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"product_attributes_slug_key\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"product_attributes_slug_key\"",
+        "sql": "CREATE UNIQUE INDEX \"product_attributes_slug_key\" ON \"public\".\"product_attributes\" (\"slug\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"product_attributes_slug_key\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"product_attributes_slug_key\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.product_attribute_values.product_attribute_values_attribute_id_fkey",
+    "label": "Add foreign key \"product_attribute_values_attribute_id_fkey\" on \"product_attribute_values\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "product_attribute_values_attribute_id_fkey",
+        "table": "product_attribute_values"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"product_attribute_values_attribute_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "product_attribute_values_attribute_id_fkey",
+          "public",
+          "\"public\".\"product_attribute_values\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"product_attribute_values_attribute_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"product_attribute_values\"\nADD CONSTRAINT \"product_attribute_values_attribute_id_fkey\"\nFOREIGN KEY (\"attribute_id\")\nREFERENCES \"public\".\"product_attributes\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"product_attribute_values_attribute_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "product_attribute_values_attribute_id_fkey",
+          "public",
+          "\"public\".\"product_attribute_values\""
+        ]
+      }
+    ]
+  }
+]

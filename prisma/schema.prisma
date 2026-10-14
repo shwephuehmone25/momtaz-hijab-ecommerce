@@ -329,6 +329,43 @@ model ProductImage {
 }
 
 // ============================================================
+// PRODUCT ATTRIBUTE
+// ============================================================
+
+model ProductAttribute {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  slug      String   @unique @db.VarChar(100)
+  type      String   @default("select") @db.VarChar(20)
+  orderBy   Int      @default(0) @map("order_by")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  values ProductAttributeValue[]
+
+  @@map("product_attributes")
+}
+
+model ProductAttributeValue {
+  id          Int      @id @default(autoincrement())
+  attributeId Int      @map("attribute_id")
+  value       String   @db.VarChar(100)
+  orderBy     Int      @default(0) @map("order_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  attribute ProductAttribute @relation(
+    fields: [attributeId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  @@unique([attributeId, value])
+  @@index([attributeId, orderBy])
+  @@map("product_attribute_values")
+}
+
+// ============================================================
 // INVENTORY
 // ============================================================
 

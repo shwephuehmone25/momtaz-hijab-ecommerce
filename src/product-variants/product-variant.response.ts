@@ -1,6 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductStatus } from '../products/dto';
 
+export class VariantInventoryResponse {
+  @ApiProperty() id!: number;
+  @ApiProperty() variantId!: number;
+  @ApiProperty() quantity!: number;
+  @ApiProperty() reservedQuantity!: number;
+  @ApiProperty() updatedAt!: Date;
+}
+
 export class ProductVariantResponse {
   @ApiProperty() id!: number;
   @ApiProperty() productId!: number;
@@ -14,6 +22,8 @@ export class ProductVariantResponse {
   @ApiProperty({ enum: ProductStatus }) status!: ProductStatus;
   @ApiProperty() createdAt!: Date;
   @ApiProperty() updatedAt!: Date;
+  @ApiPropertyOptional({ type: VariantInventoryResponse, nullable: true })
+  inventory!: VariantInventoryResponse | null;
 }
 
 export class PaginatedProductVariantsResponse {
