@@ -32,7 +32,7 @@ export class CustomerOwnershipGuard extends CustomerAuthGuard {
     const request = context.switchToHttp().getRequest<CustomerAuthRequest>();
     const requestedCustomerId = Number(request.params.customerId);
     if (request.customerAuth.customer.id !== requestedCustomerId) {
-      throw new ForbiddenException('You may only access your own cart');
+      throw new ForbiddenException('You may only access your own resources');
     }
     return true;
   }

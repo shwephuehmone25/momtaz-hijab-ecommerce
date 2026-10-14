@@ -50,3 +50,22 @@ export class AdminGuard extends AuthGuard {
     return true;
   }
 }
+
+@Injectable()
+export class OrderManagementGuard extends AuthGuard {
+  async canActivate(context: ExecutionContext) {
+    await super.canActivate(context);
+    const roles = context
+      .switchToHttp()
+      .getRequest<AuthRequest>()
+      .auth.user.roles.map((role) => role.name);
+    if (
+      !roles.some((role) =>
+        ['ADMIN', 'SUPER_ADMIN', 'ORDER_MANAGER'].includes(role),
+      )
+    ) {
+      throw new ForbiddenException('Order management access required');
+    }
+    return true;
+  }
+}
