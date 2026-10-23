@@ -10,13 +10,15 @@ import { CustomerAuthService } from './customer-auth.service';
 describe('Customer authentication', () => {
   let service: CustomerAuthService;
   let first: jest.Mock;
+  let create: jest.Mock;
 
   beforeEach(async () => {
     process.env.JWT_PUBLIC_KEY =
       'test-secret-only-with-at-least-thirty-two-characters';
     service = new CustomerAuthService(new JwtService());
     first = jest.fn();
-    const query = { where: () => query, first };
+    create = jest.fn();
+    const query = { where: () => query, first, create };
     (db.orm.public.Customer.select as jest.Mock).mockReturnValue(query);
     first.mockResolvedValue({
       id: 7,
@@ -25,6 +27,43 @@ describe('Customer authentication', () => {
       passwordHash: await hashPassword('correct-password'),
       createdAt: new Date('2026-01-01T00:00:00.000Z'),
     });
+  });
+
+  it('registers a customer with a normalized email and hashed password', async () => {
+    first.mockResolvedValueOnce(null).mockResolvedValueOnce({
+      id: 8,
+      name: 'New Customer',
+      email: 'new@example.com',
+      createdAt: new Date('2026-01-02T00:00:00.000Z'),
+    });
+    create.mockResolvedValueOnce({ id: 8 });
+
+    const result = await service.register(
+      '  New Customer  ',
+      '  NEW@example.com ',
+      'strong-password',
+    );
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'New Customer',
+        email: 'new@example.com',
+        // Jest asymmetric matchers are intentionally dynamic test values.
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        passwordHash: expect.stringMatching(/^scrypt:/),
+      }),
+    );
+    expect(result.user.email).toBe('new@example.com');
+    expect(result.access_token).toEqual(expect.any(String));
+  });
+
+  it('rejects registration when the email is already registered', async () => {
+    first.mockResolvedValueOnce({ id: 7 });
+
+    await expect(
+      service.register('Customer', 'customer@example.com', 'strong-password'),
+    ).rejects.toThrow('A customer with this email already exists');
+    expect(create).not.toHaveBeenCalled();
   });
 
   it('issues a customer-scoped session and authenticates it', async () => {

@@ -28,3 +28,5 @@ export class TokenResponse {
 export class LoginResponse extends TokenResponse {
   @ApiProperty({ type: AuthUserResponse }) user!: AuthUserResponse;
 }
+
+export class CustomerRegistrationResponse extends LoginResponse {}

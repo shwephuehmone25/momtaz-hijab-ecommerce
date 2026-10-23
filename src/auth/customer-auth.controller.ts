@@ -9,14 +9,18 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { LoginDto, RefreshDto } from './auth.dto';
+import { RefreshDto } from './auth.dto';
+import { CustomerLoginDto, CustomerRegistrationDto } from './customer-auth.dto';
 import {
   AuthUserResponse,
+  CustomerRegistrationResponse,
   LoginResponse,
   TokenResponse,
 } from './auth.responses';
@@ -34,12 +38,20 @@ import { CustomerAuthService } from './customer-auth.service';
 export class CustomerAuthController {
   constructor(private readonly auth: CustomerAuthService) {}
 
+  @Post('register')
+  @ApiOperation({ summary: 'Register a customer account' })
+  @ApiCreatedResponse({ type: CustomerRegistrationResponse })
+  @ApiConflictResponse({ description: 'Email is already registered' })
+  register(@Body() dto: CustomerRegistrationDto) {
+    return this.auth.register(dto.fullName, dto.email, dto.password);
+  }
+
   @Post('login')
   @HttpCode(200)
   @ApiOperation({ summary: 'Customer login with email and password' })
   @ApiOkResponse({ type: LoginResponse })
-  login(@Body() dto: LoginDto) {
-    return this.auth.login(dto.username, dto.password);
+  login(@Body() dto: CustomerLoginDto) {
+    return this.auth.login(dto.email, dto.password);
   }
 
   @Post('refresh')

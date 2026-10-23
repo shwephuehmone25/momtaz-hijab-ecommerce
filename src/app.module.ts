@@ -14,6 +14,7 @@ import { CartsModule } from './carts/carts.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { OrdersModule } from './orders/orders.module';
 import { AttributesModule } from './attributes/attributes.module';
+import { ShipmentsModule } from './shipments/shipments.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AttributesModule } from './attributes/attributes.module';
     DashboardModule,
     OrdersModule,
     AttributesModule,
+    ShipmentsModule,
     UsersModule,
   ],
   controllers: [AppController],

@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
   createHash,
@@ -9,6 +13,8 @@ import {
 } from 'node:crypto';
 import { promisify } from 'node:util';
 import { varchar } from '../common/database/varchar';
+import { throwIfUniqueViolation } from '../common/database/database-error';
+import { hashPassword } from '../common/security/password';
 import { db } from '../database/db';
 
 interface CustomerSession {
@@ -36,6 +42,36 @@ export class CustomerAuthService {
     }
   }
 
+  async register(fullName: string, email: string, password: string) {
+    const normalizedEmail = varchar<100>(email.trim().toLowerCase());
+    const existingCustomer = await db.orm.public.Customer.select('id')
+      .where({ email: normalizedEmail })
+      .first();
+
+    if (existingCustomer) {
+      throw new ConflictException('A customer with this email already exists');
+    }
+
+    try {
+      const customer = await db.orm.public.Customer.select('id').create({
+        name: varchar<100>(fullName.trim()),
+        email: normalizedEmail,
+        passwordHash: varchar<255>(await hashPassword(password)),
+        phone: null,
+      });
+
+      return {
+        ...this.issue(customer.id),
+        user: await this.profile(customer.id),
+      };
+    } catch (error) {
+      throwIfUniqueViolation(
+        error,
+        'A customer with this email already exists',
+      );
+    }
+  }
+
   async profile(id: number) {
     const customer = await db.orm.public.Customer.select(
       'id',
@@ -58,9 +94,9 @@ export class CustomerAuthService {
     };
   }
 
-  async login(username: string, password: string) {
+  async login(email: string, password: string) {
     const customer = await db.orm.public.Customer.select('id', 'passwordHash')
-      .where({ email: varchar<100>(username.trim().toLowerCase()) })
+      .where({ email: varchar<100>(email.trim().toLowerCase()) })
       .first();
     const valid = await this.verifyPassword(password, customer?.passwordHash);
     if (!customer || !valid) {
