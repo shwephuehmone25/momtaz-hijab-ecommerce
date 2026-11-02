@@ -1,5 +1,16 @@
 jest.mock('../database/db', () => ({
-  db: { orm: { public: { User: { select: jest.fn() } } } },
+  db: {
+    orm: {
+      public: {
+        User: { select: jest.fn() },
+        AdminSession: {
+          create: jest.fn(),
+          select: jest.fn(),
+          where: jest.fn(),
+        },
+      },
+    },
+  },
 }));
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
@@ -7,6 +18,16 @@ import { db } from '../database/db';
 import { hashPassword } from '../common/security/password';
 describe('Admin authentication', () => {
   let service: AuthService;
+  let sessions: Map<
+    string,
+    {
+      id: string;
+      userId: number;
+      refreshHash: string;
+      version: number;
+      expiresAt: bigint;
+    }
+  >;
   const profile = {
     id: 1,
     username: 'admin@example.com',
@@ -18,6 +39,8 @@ describe('Admin authentication', () => {
     permissions: ['*'],
   };
   beforeEach(async () => {
+    jest.clearAllMocks();
+    sessions = new Map();
     process.env.JWT_PUBLIC_KEY =
       'test-secret-only-with-at-least-thirty-two-characters';
     service = new AuthService(new JwtService());
@@ -28,6 +51,40 @@ describe('Admin authentication', () => {
     (db.orm.public.User.select as jest.Mock).mockReturnValue({
       where: () => ({ first }),
     });
+    (db.orm.public.AdminSession.create as jest.Mock).mockImplementation(
+      async (session) => {
+        sessions.set(session.id, session);
+        return session;
+      },
+    );
+    (db.orm.public.AdminSession.select as jest.Mock).mockReturnValue({
+      first: async (filters: { id: string; refreshHash?: string }) => {
+        const session = sessions.get(filters.id);
+        return session &&
+          (!filters.refreshHash || session.refreshHash === filters.refreshHash)
+          ? session
+          : null;
+      },
+    });
+    (db.orm.public.AdminSession.where as jest.Mock).mockImplementation(
+      (filters: { id: string; refreshHash?: string; version?: number }) => ({
+        update: async (changes: { refreshHash: string; version: number }) => {
+          const session = sessions.get(filters.id);
+          if (
+            !session ||
+            (filters.refreshHash &&
+              session.refreshHash !== filters.refreshHash) ||
+            (filters.version !== undefined &&
+              session.version !== filters.version)
+          )
+            return null;
+          const updated = { ...session, ...changes };
+          sessions.set(filters.id, updated);
+          return updated;
+        },
+        delete: async () => sessions.delete(filters.id),
+      }),
+    );
     jest.spyOn(service, 'profile').mockResolvedValue(profile);
   });
   it('rejects an incorrect password', async () => {
@@ -43,6 +100,14 @@ describe('Admin authentication', () => {
     await expect(
       service.authenticate(result.access_token + 'tampered'),
     ).rejects.toThrow();
+  });
+  it('accepts a session after the service is recreated', async () => {
+    const result = await service.login('admin@example.com', 'correct-password');
+    const restartedService = new AuthService(new JwtService());
+    jest.spyOn(restartedService, 'profile').mockResolvedValue(profile);
+    expect(
+      (await restartedService.authenticate(result.access_token)).user.id,
+    ).toBe(1);
   });
   it('rotates refresh tokens and rejects reuse', async () => {
     const result = await service.login('admin@example.com', 'correct-password');
@@ -65,7 +130,7 @@ describe('Admin authentication', () => {
   });
   it('revokes both tokens on logout', async () => {
     const result = await service.login('admin@example.com', 'correct-password');
-    service.logout((await service.authenticate(result.access_token)).sid);
+    await service.logout((await service.authenticate(result.access_token)).sid);
     await expect(service.authenticate(result.access_token)).rejects.toThrow();
     await expect(service.refresh(result.refresh_token)).rejects.toThrow();
   });
