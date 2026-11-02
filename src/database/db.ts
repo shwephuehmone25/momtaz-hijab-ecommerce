@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import type { Contract } from '../../prisma/contract';
-import contractJson from '../../prisma/contract.json';
+import contractJson from '../../prisma/contract.json' with { type: 'json' };
 
 type PostgresFactory =
   (typeof import('@prisma/orm-postgres/runtime'))['default'];
