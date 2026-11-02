@@ -5,6 +5,7 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "type": "module",
   "allowScripts": {
     "@parcel/watcher@2.6.0": true,
     "@scarf/scarf": false,
@@ -43,8 +44,7 @@
     "class-validator": "^0.15.1",
     "dotenv": "^18.0.5",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1",
-    "temporal-polyfill": "1.0.4"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
