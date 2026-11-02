@@ -16,6 +16,10 @@ export class ProductResponse {
   @ApiProperty() name!: string;
   @ApiPropertyOptional({ nullable: true }) description!: string | null;
   @ApiProperty({ enum: ProductStatus }) status!: ProductStatus;
+  @ApiProperty() isBestSeller!: boolean;
+  @ApiProperty() isVisible!: boolean;
+  @ApiPropertyOptional({ minimum: 0, nullable: true })
+  bestSellerOrder!: number | null;
   @ApiProperty() createdAt!: Date;
   @ApiProperty() updatedAt!: Date;
 }

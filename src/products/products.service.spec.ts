@@ -11,7 +11,7 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { db } from '../database/db';
-import { CreateProductDto, ProductStatus } from './dto';
+import { CreateProductDto, ProductStatus, UpdateProductDto } from './dto';
 import { ProductsService } from './products.service';
 
 describe('ProductsService', () => {
@@ -103,6 +103,9 @@ describe('ProductsService', () => {
       name: 'Luxury Chiffon',
       description: 'Lightweight hijab',
       status: ProductStatus.INACTIVE,
+      isBestSeller: false,
+      isVisible: true,
+      bestSellerOrder: null,
     });
     expect(variantCreate).toHaveBeenCalledTimes(2);
     expect(variantCreate).toHaveBeenNthCalledWith(
@@ -118,6 +121,62 @@ describe('ProductsService', () => {
       quantity: 8,
       reservedQuantity: 0,
     });
+  });
+
+  it('creates and updates storefront merchandising fields', async () => {
+    await service.create({
+      categoryId: 2,
+      name: 'Featured Product',
+      isBestSeller: true,
+      isVisible: false,
+      bestSellerOrder: 0,
+    });
+
+    expect(productCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isBestSeller: true,
+        isVisible: false,
+        bestSellerOrder: 0,
+      }),
+    );
+
+    await service.update(9, { isVisible: true, bestSellerOrder: null });
+    expect(productUpdate).toHaveBeenCalledWith({
+      isVisible: true,
+      bestSellerOrder: null,
+    });
+  });
+
+  it('validates storefront merchandising fields', async () => {
+    const createDto = plainToInstance(CreateProductDto, {
+      categoryId: 2,
+      name: 'Product',
+      isBestSeller: 'yes',
+      isVisible: 1,
+      bestSellerOrder: -1,
+    });
+    const updateDto = plainToInstance(UpdateProductDto, {
+      bestSellerOrder: 1.5,
+    });
+
+    await expect(validate(createDto)).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ property: 'isBestSeller' }),
+        expect.objectContaining({ property: 'isVisible' }),
+        expect.objectContaining({ property: 'bestSellerOrder' }),
+      ]),
+    );
+    await expect(validate(updateDto)).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ property: 'bestSellerOrder' }),
+      ]),
+    );
+  });
+
+  it('does not overwrite omitted storefront fields during update', async () => {
+    await service.update(9, { name: 'Updated' });
+
+    expect(productUpdate).toHaveBeenCalledWith({ name: 'Updated' });
   });
 
   it('rejects duplicate normalized SKUs before opening a transaction', async () => {

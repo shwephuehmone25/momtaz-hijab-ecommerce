@@ -10,9 +10,11 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
@@ -20,6 +22,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { AdminGuard } from '../auth/auth.guard';
 import { CreateProductDto, ProductsQueryDto, UpdateProductDto } from './dto';
 import {
   PaginatedProductsResponse,
@@ -30,6 +33,8 @@ import { ProductsService } from './products.service';
 
 @ApiTags('Products')
 @Controller('api/v1/admin/products')
+@UseGuards(AdminGuard)
+@ApiBearerAuth()
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 

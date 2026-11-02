@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -35,6 +36,22 @@ export class CreateProductDto {
   @IsOptional()
   @IsEnum(ProductStatus)
   status?: ProductStatus;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  isBestSeller?: boolean;
+
+  @ApiPropertyOptional({ default: true })
+  @IsOptional()
+  @IsBoolean()
+  isVisible?: boolean;
+
+  @ApiPropertyOptional({ minimum: 0, nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  bestSellerOrder?: number | null;
 
   @ApiPropertyOptional({
     type: [ProductVariantInputDto],
