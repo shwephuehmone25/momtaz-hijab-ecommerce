@@ -1,0 +1,161 @@
+[
+  {
+    "id": "table.admin_sessions",
+    "label": "Create table \"admin_sessions\"",
+    "summary": "Creates table \"admin_sessions\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "admin_sessions"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"admin_sessions\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"admin_sessions\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"admin_sessions\"",
+        "sql": "CREATE TABLE \"public\".\"admin_sessions\" (\n  \"created_at\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"expires_at\" int8 NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"refresh_hash\" character varying(64) NOT NULL,\n  \"updated_at\" timestamp(3) NOT NULL,\n  \"user_id\" int4 NOT NULL,\n  \"version\" int4 DEFAULT 0 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"admin_sessions\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"admin_sessions\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.admin_sessions.admin_sessions_expires_at_idx",
+    "label": "Create index \"admin_sessions_expires_at_idx\" on \"admin_sessions\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "admin_sessions_expires_at_idx",
+        "table": "admin_sessions"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"admin_sessions_expires_at_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"admin_sessions_expires_at_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"admin_sessions_expires_at_idx\"",
+        "sql": "CREATE INDEX \"admin_sessions_expires_at_idx\" ON \"public\".\"admin_sessions\" (\"expires_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"admin_sessions_expires_at_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"admin_sessions_expires_at_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.admin_sessions.admin_sessions_user_id_idx",
+    "label": "Create index \"admin_sessions_user_id_idx\" on \"admin_sessions\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "admin_sessions_user_id_idx",
+        "table": "admin_sessions"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"admin_sessions_user_id_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"admin_sessions_user_id_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"admin_sessions_user_id_idx\"",
+        "sql": "CREATE INDEX \"admin_sessions_user_id_idx\" ON \"public\".\"admin_sessions\" (\"user_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"admin_sessions_user_id_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"admin_sessions_user_id_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.admin_sessions.admin_sessions_user_id_fkey",
+    "label": "Add foreign key \"admin_sessions_user_id_fkey\" on \"admin_sessions\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "admin_sessions_user_id_fkey",
+        "table": "admin_sessions"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"admin_sessions_user_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "admin_sessions_user_id_fkey",
+          "public",
+          "\"public\".\"admin_sessions\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"admin_sessions_user_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"admin_sessions\"\nADD CONSTRAINT \"admin_sessions_user_id_fkey\"\nFOREIGN KEY (\"user_id\")\nREFERENCES \"public\".\"users\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"admin_sessions_user_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "admin_sessions_user_id_fkey",
+          "public",
+          "\"public\".\"admin_sessions\""
+        ]
+      }
+    ]
+  }
+]

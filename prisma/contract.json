@@ -8,6 +8,10 @@
       "model": "Address",
       "namespace": "public"
     },
+    "admin_sessions": {
+      "model": "AdminSession",
+      "namespace": "public"
+    },
     "cart_items": {
       "model": "CartItem",
       "namespace": "public"
@@ -259,6 +263,113 @@
               },
               "namespaceId": "public",
               "table": "addresses"
+            }
+          },
+          "AdminSession": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "expiresAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "refreshHash": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 64
+                  }
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "version": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "user": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "expiresAt": {
+                  "column": "expires_at"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "refreshHash": {
+                  "column": "refresh_hash"
+                },
+                "updatedAt": {
+                  "column": "updated_at"
+                },
+                "userId": {
+                  "column": "user_id"
+                },
+                "version": {
+                  "column": "version"
+                }
+              },
+              "namespaceId": "public",
+              "table": "admin_sessions"
             }
           },
           "Cart": {
@@ -1998,6 +2109,13 @@
           },
           "Product": {
             "fields": {
+              "bestSellerOrder": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "categoryId": {
                 "nullable": false,
                 "type": {
@@ -2026,6 +2144,20 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "isBestSeller": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "isVisible": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -2125,6 +2257,9 @@
             },
             "storage": {
               "fields": {
+                "bestSellerOrder": {
+                  "column": "best_seller_order"
+                },
                 "categoryId": {
                   "column": "category_id"
                 },
@@ -2136,6 +2271,12 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "isBestSeller": {
+                  "column": "is_best_seller"
+                },
+                "isVisible": {
+                  "column": "is_visible"
                 },
                 "name": {
                   "column": "name"
@@ -3192,6 +3333,21 @@
                   "model": "UserRole",
                   "namespace": "public"
                 }
+              },
+              "sessions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "userId"
+                  ]
+                },
+                "to": {
+                  "model": "AdminSession",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -3521,6 +3677,104 @@
                     "customer_id"
                   ],
                   "name": "addresses_customer_id_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "admin_sessions": {
+              "columns": {
+                "created_at": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamp",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "expires_at": {
+                  "codecId": "pg/int8@1",
+                  "nativeType": "int8",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/uuid@1",
+                  "nativeType": "uuid",
+                  "nullable": false
+                },
+                "refresh_hash": {
+                  "codecId": "sql/varchar@1",
+                  "nativeType": "character varying",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 64
+                  }
+                },
+                "updated_at": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "nativeType": "timestamp",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "user_id": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "version": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "user_id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "admin_sessions"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "expires_at"
+                  ],
+                  "name": "admin_sessions_expires_at_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "user_id"
+                  ],
+                  "name": "admin_sessions_user_id_idx",
                   "unique": false
                 }
               ],
@@ -5322,6 +5576,11 @@
             },
             "products": {
               "columns": {
+                "best_seller_order": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
                 "category_id": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
@@ -5351,6 +5610,24 @@
                     "kind": "function"
                   },
                   "nativeType": "int4",
+                  "nullable": false
+                },
+                "is_best_seller": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "is_visible": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": true
+                  },
+                  "nativeType": "bool",
                   "nullable": false
                 },
                 "name": {
@@ -5415,6 +5692,16 @@
                     "status"
                   ],
                   "name": "products_category_id_status_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "status",
+                    "is_visible",
+                    "is_best_seller",
+                    "best_seller_order"
+                  ],
+                  "name": "products_status_is_visible_is_best_seller_best_seller_order_idx",
                   "unique": false
                 }
               ],
@@ -6103,10 +6390,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "6fdaec233c09b37845dc467978d15767b45f1340ae4ef77089a037b0181519a8"
+    "storageHash": "64ff5bfac949332737a5ce1b3d4d43656aef73d77e9e91ec58e27bb2be90ea12"
   },
   "execution": {
-    "executionHash": "d1df499c7e780da61729e90e71e88554f24f46df5fa134e95447878438b6369a",
+    "executionHash": "ec2639aba0f19b1d009da6470def62f34d8ac0b32997b1fa42e106bcc8ee2b4b",
     "mutations": {
       "defaults": [
         {
@@ -6120,6 +6407,21 @@
           },
           "ref": {
             "entry": "addresses",
+            "field": "updated_at",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "plainDateTimeNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "plainDateTimeNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "admin_sessions",
             "field": "updated_at",
             "namespace": "public"
           }

@@ -98,10 +98,28 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  roles UserRole[]
+  roles    UserRole[]
+  sessions AdminSession[]
 
   @@index([status])
   @@map("users")
+}
+
+model AdminSession {
+  id          String @id @db.Uuid
+  userId      Int    @map("user_id")
+  refreshHash String @map("refresh_hash") @db.VarChar(64)
+  version     Int    @default(0)
+  expiresAt   BigInt @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("admin_sessions")
 }
 
 model Role {
@@ -245,7 +263,10 @@ model Product {
   name        String        @db.VarChar(150)
   description String?
 
-  status      ProductStatus @default(ACTIVE)
+  status          ProductStatus @default(ACTIVE)
+  isBestSeller    Boolean       @default(false) @map("is_best_seller")
+  isVisible       Boolean       @default(true) @map("is_visible")
+  bestSellerOrder Int?          @map("best_seller_order")
 
   createdAt   DateTime      @default(now()) @map("created_at")
   updatedAt   DateTime      @updatedAt @map("updated_at")
@@ -262,6 +283,8 @@ model Product {
 
   // Optimized for storefront category/status filtering.
   @@index([categoryId, status])
+  // Supports the public best-seller filter and manual priority ordering.
+  @@index([status, isVisible, isBestSeller, bestSellerOrder])
 
   @@map("products")
 }

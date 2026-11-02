@@ -34,9 +34,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'6fdaec233c09b37845dc467978d15767b45f1340ae4ef77089a037b0181519a8'>;
+  StorageHashBase<'64ff5bfac949332737a5ce1b3d4d43656aef73d77e9e91ec58e27bb2be90ea12'>;
 export type ExecutionHash =
-  ExecutionHashBase<'d1df499c7e780da61729e90e71e88554f24f46df5fa134e95447878438b6369a'>;
+  ExecutionHashBase<'ec2639aba0f19b1d009da6470def62f34d8ac0b32997b1fa42e106bcc8ee2b4b'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -262,6 +262,15 @@ export type FieldOutputTypes = {
       readonly state: Varchar<100> | null;
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     };
+    readonly AdminSession: {
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly expiresAt: CodecTypes['pg/int8@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly refreshHash: Varchar<64>;
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly userId: CodecTypes['pg/int4@1']['output'];
+      readonly version: CodecTypes['pg/int4@1']['output'];
+    };
     readonly Cart: {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly customerId: CodecTypes['pg/int4@1']['output'];
@@ -397,10 +406,13 @@ export type FieldOutputTypes = {
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     };
     readonly Product: {
+      readonly bestSellerOrder: CodecTypes['pg/int4@1']['output'] | null;
       readonly categoryId: CodecTypes['pg/int4@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly description: CodecTypes['pg/text@1']['output'] | null;
       readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly isBestSeller: CodecTypes['pg/bool@1']['output'];
+      readonly isVisible: CodecTypes['pg/bool@1']['output'];
       readonly name: Varchar<150>;
       readonly status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
@@ -511,6 +523,15 @@ export type FieldInputTypes = {
       readonly postalCode: CodecTypes['sql/varchar@1']['input'] | null;
       readonly state: CodecTypes['sql/varchar@1']['input'] | null;
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+    };
+    readonly AdminSession: {
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly expiresAt: CodecTypes['pg/int8@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly refreshHash: CodecTypes['sql/varchar@1']['input'];
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly userId: CodecTypes['pg/int4@1']['input'];
+      readonly version: CodecTypes['pg/int4@1']['input'];
     };
     readonly Cart: {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
@@ -647,10 +668,13 @@ export type FieldInputTypes = {
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
     };
     readonly Product: {
+      readonly bestSellerOrder: CodecTypes['pg/int4@1']['input'] | null;
       readonly categoryId: CodecTypes['pg/int4@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly description: CodecTypes['pg/text@1']['input'] | null;
       readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly isBestSeller: CodecTypes['pg/bool@1']['input'];
+      readonly isVisible: CodecTypes['pg/bool@1']['input'];
       readonly name: CodecTypes['sql/varchar@1']['input'];
       readonly status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
@@ -761,6 +785,15 @@ export type StorageColumnTypes = {
       readonly postal_code: Varchar<20> | null;
       readonly state: Varchar<100> | null;
       readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['output'];
+    };
+    readonly admin_sessions: {
+      readonly created_at: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly expires_at: CodecTypes['pg/int8@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly refresh_hash: Varchar<64>;
+      readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly user_id: CodecTypes['pg/int4@1']['output'];
+      readonly version: CodecTypes['pg/int4@1']['output'];
     };
     readonly cart_items: {
       readonly cart_id: CodecTypes['pg/int4@1']['output'];
@@ -934,10 +967,13 @@ export type StorageColumnTypes = {
       readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['output'];
     };
     readonly products: {
+      readonly best_seller_order: CodecTypes['pg/int4@1']['output'] | null;
       readonly category_id: CodecTypes['pg/int4@1']['output'];
       readonly created_at: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly description: CodecTypes['pg/text@1']['output'] | null;
       readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly is_best_seller: CodecTypes['pg/bool@1']['output'];
+      readonly is_visible: CodecTypes['pg/bool@1']['output'];
       readonly name: Varchar<150>;
       readonly status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
       readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['output'];
@@ -1011,6 +1047,15 @@ export type StorageColumnInputTypes = {
       readonly postal_code: CodecTypes['sql/varchar@1']['input'] | null;
       readonly state: CodecTypes['sql/varchar@1']['input'] | null;
       readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['input'];
+    };
+    readonly admin_sessions: {
+      readonly created_at: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly expires_at: CodecTypes['pg/int8@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly refresh_hash: CodecTypes['sql/varchar@1']['input'];
+      readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly user_id: CodecTypes['pg/int4@1']['input'];
+      readonly version: CodecTypes['pg/int4@1']['input'];
     };
     readonly cart_items: {
       readonly cart_id: CodecTypes['pg/int4@1']['input'];
@@ -1184,10 +1229,13 @@ export type StorageColumnInputTypes = {
       readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['input'];
     };
     readonly products: {
+      readonly best_seller_order: CodecTypes['pg/int4@1']['input'] | null;
       readonly category_id: CodecTypes['pg/int4@1']['input'];
       readonly created_at: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly description: CodecTypes['pg/text@1']['input'] | null;
       readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly is_best_seller: CodecTypes['pg/bool@1']['input'];
+      readonly is_visible: CodecTypes['pg/bool@1']['input'];
       readonly name: CodecTypes['sql/varchar@1']['input'];
       readonly status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
       readonly updated_at: CodecTypes['pg/timestamp-temporal@1']['input'];
@@ -1263,6 +1311,17 @@ export namespace Models {
     updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     customer: public_Customer;
     readonly [RelationKeys]?: 'customer';
+  };
+  export type public_AdminSession = {
+    createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    expiresAt: CodecTypes['pg/int8@1']['output'];
+    id: CodecTypes['pg/uuid@1']['output'];
+    refreshHash: Varchar<64>;
+    updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    userId: CodecTypes['pg/int4@1']['output'];
+    version: CodecTypes['pg/int4@1']['output'];
+    user: public_User;
+    readonly [RelationKeys]?: 'user';
   };
   export type public_Cart = {
     createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
@@ -1436,10 +1495,13 @@ export namespace Models {
     readonly [RelationKeys]?: 'roles';
   };
   export type public_Product = {
+    bestSellerOrder: CodecTypes['pg/int4@1']['output'] | null;
     categoryId: CodecTypes['pg/int4@1']['output'];
     createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     description: CodecTypes['pg/text@1']['output'] | null;
     id: CodecTypes['pg/int4@1']['output'];
+    isBestSeller: CodecTypes['pg/bool@1']['output'];
+    isVisible: CodecTypes['pg/bool@1']['output'];
     name: Varchar<150>;
     status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
     updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
@@ -1551,7 +1613,8 @@ export namespace Models {
     status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
     updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     roles: public_UserRole[];
-    readonly [RelationKeys]?: 'roles';
+    sessions: public_AdminSession[];
+    readonly [RelationKeys]?: 'roles' | 'sessions';
   };
   export type public_UserRole = {
     assignedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
@@ -1566,6 +1629,7 @@ export namespace Models {
 export declare const models: {
   public: {
     Address: Models.public_Address;
+    AdminSession: Models.public_AdminSession;
     Cart: Models.public_Cart;
     CartItem: Models.public_CartItem;
     Category: Models.public_Category;
@@ -1696,6 +1760,81 @@ type ContractBase = Omit<
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'customers';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly admin_sessions: {
+              columns: {
+                readonly created_at: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly expires_at: {
+                  readonly nativeType: 'int8';
+                  readonly codecId: 'pg/int8@1';
+                  readonly nullable: false;
+                };
+                readonly id: {
+                  readonly nativeType: 'uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                };
+                readonly refresh_hash: {
+                  readonly nativeType: 'character varying';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly length: 64 };
+                };
+                readonly updated_at: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly user_id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly version: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'admin_sessions_expires_at_idx';
+                  readonly columns: readonly ['expires_at'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'admin_sessions_user_id_idx';
+                  readonly columns: readonly ['user_id'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'admin_sessions';
+                    readonly columns: readonly ['user_id'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'users';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -3008,6 +3147,11 @@ type ContractBase = Omit<
             };
             readonly products: {
               columns: {
+                readonly best_seller_order: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
                 readonly category_id: {
                   readonly nativeType: 'int4';
                   readonly codecId: 'pg/int4@1';
@@ -3032,6 +3176,24 @@ type ContractBase = Omit<
                   readonly default: {
                     readonly kind: 'function';
                     readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly is_best_seller: {
+                  readonly nativeType: 'bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                };
+                readonly is_visible: {
+                  readonly nativeType: 'bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', true>;
                   };
                 };
                 readonly name: {
@@ -3063,6 +3225,16 @@ type ContractBase = Omit<
                 {
                   readonly name: 'products_category_id_status_idx';
                   readonly columns: readonly ['category_id', 'status'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'products_status_is_visible_is_best_seller_best_seller_order_idx';
+                  readonly columns: readonly [
+                    'status',
+                    'is_visible',
+                    'is_best_seller',
+                    'best_seller_order',
+                  ];
                   readonly unique: false;
                 },
               ];
@@ -3582,6 +3754,10 @@ type ContractBase = Omit<
   readonly targetFamily: 'sql';
   readonly roots: {
     readonly addresses: { readonly namespace: 'public' & NamespaceId; readonly model: 'Address' };
+    readonly admin_sessions: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'AdminSession';
+    };
     readonly cart_items: { readonly namespace: 'public' & NamespaceId; readonly model: 'CartItem' };
     readonly carts: { readonly namespace: 'public' & NamespaceId; readonly model: 'Cart' };
     readonly categories: { readonly namespace: 'public' & NamespaceId; readonly model: 'Category' };
@@ -3744,6 +3920,74 @@ type ContractBase = Omit<
                 readonly postalCode: { readonly column: 'postal_code' };
                 readonly state: { readonly column: 'state' };
                 readonly updatedAt: { readonly column: 'updated_at' };
+              };
+            };
+          };
+          readonly AdminSession: {
+            readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly expiresAt: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int8@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly refreshHash: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly typeParams: { readonly length: 64 };
+                };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly userId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly version: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+            };
+            readonly relations: {
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'admin_sessions';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'created_at' };
+                readonly expiresAt: { readonly column: 'expires_at' };
+                readonly id: { readonly column: 'id' };
+                readonly refreshHash: { readonly column: 'refresh_hash' };
+                readonly updatedAt: { readonly column: 'updated_at' };
+                readonly userId: { readonly column: 'user_id' };
+                readonly version: { readonly column: 'version' };
               };
             };
           };
@@ -4947,6 +5191,10 @@ type ContractBase = Omit<
           };
           readonly Product: {
             readonly fields: {
+              readonly bestSellerOrder: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly categoryId: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
@@ -4966,6 +5214,14 @@ type ContractBase = Omit<
               readonly id: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly isBestSeller: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly isVisible: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
               };
               readonly name: {
                 readonly nullable: false;
@@ -5043,10 +5299,13 @@ type ContractBase = Omit<
               readonly table: 'products';
               readonly namespaceId: 'public';
               readonly fields: {
+                readonly bestSellerOrder: { readonly column: 'best_seller_order' };
                 readonly categoryId: { readonly column: 'category_id' };
                 readonly createdAt: { readonly column: 'created_at' };
                 readonly description: { readonly column: 'description' };
                 readonly id: { readonly column: 'id' };
+                readonly isBestSeller: { readonly column: 'is_best_seller' };
+                readonly isVisible: { readonly column: 'is_visible' };
                 readonly name: { readonly column: 'name' };
                 readonly status: { readonly column: 'status' };
                 readonly updatedAt: { readonly column: 'updated_at' };
@@ -5781,6 +6040,17 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['userId'];
                 };
               };
+              readonly sessions: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'AdminSession';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
             };
             readonly storage: {
               readonly table: 'users';
@@ -5880,6 +6150,15 @@ type ContractBase = Omit<
           readonly onUpdate: { readonly id: 'plainDateTimeNow'; readonly kind: 'generator' };
           readonly ref: {
             readonly entry: 'addresses';
+            readonly field: 'updated_at';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'plainDateTimeNow'; readonly kind: 'generator' };
+          readonly onUpdate: { readonly id: 'plainDateTimeNow'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'admin_sessions';
             readonly field: 'updated_at';
             readonly namespace: 'public';
           };

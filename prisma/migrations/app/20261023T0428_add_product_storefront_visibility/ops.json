@@ -1,0 +1,167 @@
+[
+  {
+    "id": "column.public.products.best_seller_order",
+    "label": "Add column \"best_seller_order\" to \"products\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "best_seller_order",
+        "table": "products"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"best_seller_order\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "products",
+          "best_seller_order"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"best_seller_order\"",
+        "sql": "ALTER TABLE \"public\".\"products\" ADD COLUMN \"best_seller_order\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"best_seller_order\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "products",
+          "best_seller_order"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.products.is_best_seller",
+    "label": "Add column \"is_best_seller\" to \"products\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_best_seller",
+        "table": "products"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_best_seller\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "products",
+          "is_best_seller"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_best_seller\"",
+        "sql": "ALTER TABLE \"public\".\"products\" ADD COLUMN \"is_best_seller\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_best_seller\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "products",
+          "is_best_seller"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.products.is_visible",
+    "label": "Add column \"is_visible\" to \"products\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_visible",
+        "table": "products"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_visible\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "products",
+          "is_visible"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_visible\"",
+        "sql": "ALTER TABLE \"public\".\"products\" ADD COLUMN \"is_visible\" bool DEFAULT true NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_visible\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "products",
+          "is_visible"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.products.products_status_is_visible_is_best_seller_best_seller_order_idx",
+    "label": "Create index \"products_status_is_visible_is_best_seller_best_seller_order_idx\" on \"products\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "products_status_is_visible_is_best_seller_best_seller_order_idx",
+        "table": "products"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"products_status_is_visible_is_best_seller_best_seller_order_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"products_status_is_visible_is_best_seller_best_seller_order_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"products_status_is_visible_is_best_seller_best_seller_order_idx\"",
+        "sql": "CREATE INDEX \"products_status_is_visible_is_best_seller_best_seller_order_idx\" ON \"public\".\"products\" (\"status\", \"is_visible\", \"is_best_seller\", \"best_seller_order\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"products_status_is_visible_is_best_seller_best_seller_order_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"products_status_is_visible_is_best_seller_best_seller_order_idx\""
+        ]
+      }
+    ]
+  }
+]
